@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAP</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <a href="#" class="logo">Make a Playlist</a>
+
+        <nav class="navbar">
+            <a href="#home" style="--i:1;" class="active">Home</a>
+            <a href="#about" style="--i:2;">About</a>
+            <a href="#htu" style="--i:3;">How to use</a>
+            <a href="#PFG" style="--i:4;">Genres</Inp></a>
+            <a href="#PFA" style="--i:5;">Artists</a>
+        </nav>
+    </header>
+
+    <!-- Home -->
+    <section class="home" id="home">
+        <div id="preload">
+            <img src="/static/images/background1.jpg">
+            <img src="/static/images/background2.jpg">
+            <img src="/static/images/background3.jpg">
+            <img src="/static/images/background4.jpg">
+        </div>
+        <div class="home-content">
+            <h2><span class="questions"></span></h2>
+            <h1>Make a playlist is here!</h1>
+            <h2>Let us create the most suitable playlist for your taste.</h2>
+            <p>Currently working only with Spotify.</p>
+            <a href="#PFG" class="btn">Get started</a>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section class="about" id="about">
+        <div class="about-content">
+            <h1 class="heading">About <span>Us</span></h1>
+            <h2>The best way to not get repetetive with your music.</h2>
+            <h3>We can offer a bunch of interesting, unusual or even the most unexpected solutions and suggestion.
+                And really, it doesn't matter if you prefer <span class="genres"></span></h3>
+        </div>
+    </section>
+
+    <!-- How to use -->
+    <section class="htu" id="htu">
+        <div class="htu-content">
+            <h1 class="heading">How to use</h1>
+            <h2>After logging in, simply type the song genre in the search bar.
+            Additionally, you can specify the ammount of songs you want your playlist to have.</h2>
+            <h3>Then just sit back, relax, and let us do the rest.
+                And if you think that we did our job nicely,
+                you can add it to favorites on Spotify!</h3>
+        </div>
+    </section>
+
+    <!-- Generate playlist from genre -->
+    <section class="PFG" id="PFG">
+        <div class="PFG-content">
+            <h1 class="heading">Generate Playlist from Genre</h1>
+            <form action="/generate_genre_playlist" method="POST">
+                <div class="input-box-PFA">
+                    <input type="number" id="num_songs" name="num_songs" max="50" required>
+                    <label>Number of tracks in playlist</label>
+                </div>
+
+                <div class="input-box-PFA">
+                    <input type="text" id="genre" name="genre" required>
+                    <label>Artist name</label>
+                </div>
+                
+                <button type="submit" class="btn-PFG">Generate Playlist</button>
+            </form>
+            {% if genre_playlist_url %}
+                <p>Playlist created! Listen <a href="{{ genre_playlist_url }}" target="_blank">here</a>.</p>
+            {% elif genre_error %}
+                <p>{{ genre_error }}</p>
+            {% endif %}
+        </div>
+    </section>
+
+
+    <!-- Generate playlist from artist -->
+    <section class="PFA" id="PFA">
+        <div class="PFA-content">
+            <h1 class="heading">Generate Playlist from Artist</h1>
+            <form action="/generate_artist_playlist" method="POST">
+                <div class="input-box-PFA">
+                    <input type="number" id="num_songs" name="num_songs" max="20" required>
+                    <label>Number of tracks in playlist</label>
+                </div>
+
+                <div class="input-box-PFA">
+                    <input type="text" id="artist_name" name="artist_name" required>
+                    <label>Artist name</label>
+                </div>
+
+                <button type="submit" class="btn-PFA">Generate Playlist</button>
+            </form>
+            {% if artist_playlist_url %}
+                <p>Playlist created! Listen <a href="{{ artist_playlist_url }}" target="_blank">here</a>.</p>
+            {% elif artist_error %}
+                <p>{{ artist_error }}</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
