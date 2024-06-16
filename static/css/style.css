@@ -390,7 +390,7 @@ body::-webkit-scrollbar{
     border: 2px solid rgb(164, 64, 77);
     outline: none;
     border-radius: 40px;
-    color: #fff;
+    color: #e7a2a2;
     padding: 0 20px;
     transition: .5s ease;
 }
@@ -409,7 +409,7 @@ body::-webkit-scrollbar{
     left: 20px;
     transform: translateY(-50%);
     font-size: 1em;
-    color: #fff;
+    color: #998c8c;
     pointer-events: none;
     transition: .5s ease;
 }
@@ -529,7 +529,7 @@ body::-webkit-scrollbar{
     border: 2px solid rgb(164, 64, 77);
     outline: none;
     border-radius: 40px;
-    color: #fff;
+    color: #e7a2a2;
     padding: 0 20px;
     transition: .5s ease;
 }
@@ -548,7 +548,7 @@ body::-webkit-scrollbar{
     left: 20px;
     transform: translateY(-50%);
     font-size: 1em;
-    color: #fff;
+    color: #998c8c;
     pointer-events: none;
     transition: .5s ease;
 }
@@ -581,6 +581,15 @@ body::-webkit-scrollbar{
 
 .btn-PFA:hover {
     box-shadow: none;
+}
+
+
+/* RESULTS */
+#genre-result, #artist-result {
+    font-size: 16px;
+    margin-top: 20px;
+    text-align: center;
+    color:rgb(164, 64, 77);
 }
 
 

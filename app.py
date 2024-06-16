@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
@@ -76,11 +76,11 @@ def generate_genre_playlist():
     playlist_url, suggested_genre = create_playlist(num_songs, genre)
     
     if playlist_url:
-        return render_template('index.html', genre_playlist_url=playlist_url)
+        return jsonify({'playlist_url': playlist_url})
     elif suggested_genre:
-        return render_template('index.html', genre_error=f"Did you mean '{suggested_genre}'?", genre_input=genre)
+        return jsonify({'error': f"Did you mean '{suggested_genre}'?"})
     else:
-        return render_template('index.html', genre_error=f"No tracks found for genre: {genre}")
+        return jsonify({'error': f"No tracks found for genre: {genre}"})
 
 @app.route('/generate_artist_playlist', methods=['POST'])
 def generate_artist_playlist():
@@ -89,9 +89,11 @@ def generate_artist_playlist():
     playlist_url = create_random_artist_playlist(num_songs, artist_name)
     
     if playlist_url:
-        return render_template('index.html', artist_playlist_url=playlist_url)
+        return jsonify({'playlist_url': playlist_url})
     else:
-        return render_template('index.html', artist_error=f"Artist '{artist_name}' not found or no top tracks available.")
+        return jsonify({'error': f"Artist '{artist_name}' not found or no top tracks available."})
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
