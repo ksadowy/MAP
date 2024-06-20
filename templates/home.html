@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAP</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/home.css">
 </head>
 <body>
     <header class="header">
@@ -16,8 +16,7 @@
             <a href="#home" style="--i:1;" class="active">Home</a>
             <a href="#about" style="--i:2;">About</a>
             <a href="#htu" style="--i:3;">How to use</a>
-            <a href="#PFG" style="--i:4;">Genres</Inp></a>
-            <a href="#PFA" style="--i:5;">Artists</a>
+            <a href="{{ url_for('login_register') }}" style="--i:4;">Sign In/Up</a>
         </nav>
     </header>
 
@@ -60,58 +59,7 @@
         </div>
     </section>
 
-    <!-- Generate playlist from genre -->
-    <section class="PFG" id="PFG">
-        <div class="PFG-content">
-            <h1 class="heading">Generate Playlist from Genre</h1>
-            <form action="/generate_genre_playlist" method="POST">
-                <div class="input-box-PFA">
-                    <input type="number" id="num_songs" name="num_songs" max="50" required>
-                    <label>Number of tracks in playlist</label>
-                </div>
-
-                <div class="input-box-PFA">
-                    <input type="text" id="genre" name="genre" required>
-                    <label>Genre name</label>
-                </div>
-
-                <button type="submit" class="btn-PFG">Generate Playlist</button>
-            </form>
-            {% if genre_playlist_url %}
-                <p>Playlist created! Listen <a href="{{ genre_playlist_url }}" target="_blank">here</a>.</p>
-            {% elif genre_error %}
-                <p>{{ genre_error }}</p>
-            {% endif %}
-        </div>
-    </section>
-
-
-    <!-- Generate playlist from artist -->
-    <section class="PFA" id="PFA">
-        <div class="PFA-content">
-            <h1 class="heading">Generate Playlist from Artist</h1>
-            <form action="/generate_artist_playlist" method="POST">
-                <div class="input-box-PFA">
-                    <input type="number" id="num_songs" name="num_songs" max="20" required>
-                    <label>Number of tracks in playlist</label>
-                </div>
-
-                <div class="input-box-PFA">
-                    <input type="text" id="artist_name" name="artist_name" required>
-                    <label>Artist name</label>
-                </div>
-
-                <button type="submit" class="btn-PFA">Generate Playlist</button>
-            </form>
-            {% if artist_playlist_url %}
-                <p>Playlist created! Listen <a href="{{ artist_playlist_url }}" target="_blank">here</a>.</p>
-            {% elif artist_error %}
-                <p>{{ artist_error }}</p>
-            {% endif %}
-        </div>
-    </section>
-
     <script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
-    <script src="/static/js/script.js"></script>
+    <script src="/static/js/home.js"></script>
 </body>
 </html>

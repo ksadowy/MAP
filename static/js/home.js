@@ -63,43 +63,18 @@ function showHide() {
             type: 'POST',
             url: '/generate_genre_playlist',
             data: $(this).serialize(),
-            dataType: 'json',  // Ensure that jQuery understands the response is JSON
             success: function(response) {
-                if (response.playlist_url) {
-                    $('#genre-result').html('<p>Playlist created! Listen <a href="' + response.playlist_url + '" target="_blank">here</a></p>');
+                if (response.includes('http')) {
+                    $('#genre-result').html('<p>Playlist created! Listen <a href="' + response + '" target="_blank">here</a></p>');
                     $('#genre-result').css('color', 'rgb(164, 64, 77)');
                 } else {
-                    $('#genre-result').html('<p>' + response.error + '</p>');
+                    $('#genre-result').html('<p>' + response + '</p>');
                     $('#genre-result').css('color', 'red');
                 }
             },
             error: function(error) {
-                $('#genre-result').html('<p>' + error.responseJSON.error + '</p>');
+                $('#genre-result').html('<p>An error occurred while creating the playlist.</p>');
                 $('#genre-result').css('color', 'red');
-            }
-        });
-    });
-
-    $('#artist-form').on('submit', function(event) {
-        event.preventDefault();
-
-        $.ajax({
-            type: 'POST',
-            url: '/generate_artist_playlist',
-            data: $(this).serialize(),
-            dataType: 'json',  // Ensure that jQuery understands the response is JSON
-            success: function(response) {
-                if (response.playlist_url) {
-                    $('#artist-result').html('<p>Playlist created! Listen <a href="' + response.playlist_url + '" target="_blank">here</a></p>');
-                    $('#artist-result').css('color', 'rgb(164, 64, 77)');
-                } else {
-                    $('#artist-result').html('<p>' + response.error + '</p>');
-                    $('#artist-result').css('color', 'red');
-                }
-            },
-            error: function(error) {
-                $('#artist-result').html('<p>' + error.responseJSON.error + '</p>');
-                $('#artist-result').css('color', 'red');
             }
         });
     });

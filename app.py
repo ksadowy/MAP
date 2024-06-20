@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
@@ -24,10 +24,10 @@ def create_random_artist_playlist(num_songs, artist_name):
     results = sp.search(q=f'artist:{artist_name}', type='artist', limit=1)
     if not results['artists']['items']:
         return None
-    
+
     artist_id = results['artists']['items'][0]['id']
     top_tracks = sp.artist_top_tracks(artist_id)['tracks']
-    
+
     if not top_tracks:
         return None
 
@@ -52,7 +52,7 @@ def create_playlist(num_songs, genre):
 
     results = sp.search(q=f'genre:{genre}', type='track', limit=50)
     tracks = results['tracks']['items']
-    
+
     if len(tracks) == 0:
         return None, None
 
@@ -67,33 +67,38 @@ def create_playlist(num_songs, genre):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('home.html')
+
+@app.route('/login', methods=['POST'])
+def login():
+    # Logic for user login goes here
+    return redirect(url_for('genre_playlist'))
+
+@app.route('/register', methods=['POST'])
+def register():
+    # Logic for user registration goes here
+    return redirect(url_for('genre_playlist'))
+
+@app.route('/genre_playlist')
+def genre_playlist():
+    return render_template('genre_playlist.html')
 
 @app.route('/generate_genre_playlist', methods=['POST'])
 def generate_genre_playlist():
     num_songs = int(request.form['num_songs'])
     genre = request.form['genre']
     playlist_url, suggested_genre = create_playlist(num_songs, genre)
-    
+
     if playlist_url:
-        return jsonify({'playlist_url': playlist_url})
+        return render_template('genre_playlist.html', genre_playlist_url=playlist_url)
     elif suggested_genre:
-        return jsonify({'error': f"Did you mean '{suggested_genre}'?"})
+        return render_template('genre_playlist.html', genre_error=f"Did you mean '{suggested_genre}'?", genre_input=genre)
     else:
-        return jsonify({'error': f"No tracks found for genre: {genre}"})
+        return render_template('genre_playlist.html', genre_error=f"No tracks found for genre: {genre}")
 
-@app.route('/generate_artist_playlist', methods=['POST'])
-def generate_artist_playlist():
-    num_songs = int(request.form['num_songs'])
-    artist_name = request.form['artist_name']
-    playlist_url = create_random_artist_playlist(num_songs, artist_name)
-    
-    if playlist_url:
-        return jsonify({'playlist_url': playlist_url})
-    else:
-        return jsonify({'error': f"Artist '{artist_name}' not found or no top tracks available."})
-
-
+@app.route('/login_register')
+def login_register():
+    return render_template('login_register.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
