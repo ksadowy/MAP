@@ -22,7 +22,7 @@
             <h1 class="heading">Generate Playlist from Genre</h1>
             <form id="genre-form" action="/generate_genre_playlist" method="POST">
                 <div class="input-box-PFG">
-                    <input type="number" id="num_songs" name="num_songs" max="50" required>
+                    <input type="number" id="num_songs" name="num_songs" min="" max="50" required>
                     <label>Number of tracks in playlist</label>
                 </div>
 
@@ -33,7 +33,13 @@
 
                 <button type="submit" class="btn-PFG">Generate Playlist</button>
             </form>
-            <div id="genre-result"></div>
+            <div id="genre-result">
+                {% if genre_playlist_url %}
+                    <iframe src="{{ genre_playlist_url }}" width="200" height="280" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+                {% elif genre_error %}
+                    <p>{{ genre_error }}</p>
+                {% endif %}
+            </div>
         </div>
     </section>
 </body>

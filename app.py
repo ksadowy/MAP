@@ -197,12 +197,20 @@ def generate_genre_playlist():
     playlist_url, suggested_genre = create_playlist(num_songs, genre)
 
     if playlist_url:
-        save_playlist_to_db(playlist_url, genre, current_user.username)
-        return render_template('genre_playlist.html', genre_playlist_url=playlist_url)
+        new_playlist = Playlist(
+            playlist_link=playlist_url,
+            genre=genre,
+            username=current_user.username
+        )
+        db.session.add(new_playlist)
+        db.session.commit()
+
+        return render_template('generator.html', genre_playlist_url=playlist_url)
     elif suggested_genre:
-        return render_template('genre_playlist.html', genre_error=f"Did you mean '{suggested_genre}'?", genre_input=genre)
+        return render_template('generator.html', genre_error=f"Did you mean '{suggested_genre}'?", genre_input=genre)
     else:
-        return render_template('genre_playlist.html', genre_error=f"No tracks found for genre: {genre}")
+        return render_template('generator.html', genre_error=f"No tracks found for genre: {genre}")
+
     
 @app.route('/randomizer')
 @login_required
@@ -214,10 +222,9 @@ def randomizer():
 def get_random_playlist():
     playlist = Playlist.query.order_by(db.func.random()).first()
     if playlist:
-        flash(f"Random Playlist: {playlist.playlist_link} (Genre: {playlist.genre})", 'success')
+        return render_template('randomizer.html', random_playlist_url=playlist.playlist_link)
     else:
-        flash('No playlists available', 'danger')
-    return redirect(url_for('randomizer'))
+        return render_template('randomizer.html', playlist_error='No playlists available')
 
 @app.route('/login_register')
 def login_register():
