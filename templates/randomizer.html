@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/css/generator.css">
-    <title>MAP</title>
+    <title>MAP - Random Playlist</title>
 </head>
 <body>
     <header class="header">
@@ -19,21 +19,10 @@
 
     <section class="PFG" id="PFG">
         <div class="PFG-content">
-            <h1 class="heading">Generate Playlist from Genre</h1>
-            <form id="genre-form" action="/generate_genre_playlist" method="POST">
-                <div class="input-box-PFG">
-                    <input type="number" id="num_songs" name="num_songs" max="50" required>
-                    <label>Number of tracks in playlist</label>
-                </div>
-
-                <div class="input-box-PFG">
-                    <input type="text" id="genre" name="genre" required>
-                    <label>Genre name</label>
-                </div>
-
-                <button type="submit" class="btn-PFG">Generate Playlist</button>
+            <h1 class="heading">Random Playlist</h1>
+            <form id="random-form" action="{{ url_for('get_random_playlist') }}" method="POST">
+                <button type="submit" class="btn-PFG">Get Random Playlist</button>
             </form>
-            <div id="genre-result"></div>
         </div>
     </section>
 </body>

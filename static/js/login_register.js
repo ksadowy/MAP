@@ -9,3 +9,11 @@ registerBtn.addEventListener('click', () => {
 loginBtn.addEventListener('click', () => {
     container.classList.remove("active");
 });
+
+document.getElementById('login').addEventListener('click', () => {
+    container.classList.remove("right-panel-active");
+});
+
+document.getElementById('register').addEventListener('click', () => {
+    container.classList.add("right-panel-active");
+});

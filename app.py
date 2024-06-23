@@ -1,12 +1,42 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
 import random
 import difflib
 import os
+import re
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///map.db'
+app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_PERMANENT'] = True
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+
+class Playlist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    playlist_link = db.Column(db.String(150), nullable=False)
+    genre = db.Column(db.String(50), nullable=False)
+    username = db.Column(db.String(50), nullable=False)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 load_dotenv()
 
@@ -65,36 +95,129 @@ def create_playlist(num_songs, genre):
 
     return playlist['external_urls']['spotify'], None
 
+def save_playlist_to_db(playlist_link, genre, username):
+    new_playlist = Playlist(playlist_link=playlist_link, genre=genre, username=username)
+    db.session.add(new_playlist)
+    db.session.commit()
+
 @app.route('/')
 def index():
     return render_template('home.html')
 
-@app.route('/login', methods=['POST'])
+# Log in
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Logic for user login goes here
-    return redirect(url_for('genre_playlist'))
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
 
-@app.route('/register', methods=['POST'])
+        if user and bcrypt.check_password_hash(user.password, password):
+            login_user(user)
+            db.session.commit()
+
+            session['username'] = username
+            session.modified = True
+            
+            flash('Login successful', 'success')
+            return redirect(url_for('generator'))
+        
+        flash('Invalid username or password', 'danger')
+    return render_template('login_register.html', login=True)
+
+# Register
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    # Logic for user registration goes here
-    return redirect(url_for('genre_playlist'))
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        # Unique username check
+        user_username_exists = User.query.filter_by(username=username).first()
+        if user_username_exists:
+            flash('Username already exists', 'danger')
+            return redirect(url_for('login_register'))
+        
+        # Unique email check
+        user_email_exists = User.query.filter_by(email=email).first()
+        if user_email_exists:
+            flash('Email already in use', 'danger')
+            return redirect(url_for('login_register'))
+        
+        # Email format validation
+        email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        if not re.match(email_regex, email):
+            flash('Invalid email address', 'danger')
+            return redirect(url_for('login_register'))
+        
+        # Identical passwords check
+        if password != confirm_password:
+            flash('Passwords do not match', 'danger')
+            return redirect(url_for('login_register'))
+        
+        # Check for strong password
+        password_regex = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$'
+        if not re.match(password_regex, password):
+            flash('Password must be at least 8 characters long and include a number and a special character', 'danger')
+            return redirect(url_for('login_register'))
+        
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        new_user = User(username=username, email=email, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Registration successful! You can now log in.', 'success')
+
+        return redirect(url_for('login_register'))
+    return render_template('login_register.html', register=True)
+
+# Log out
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login_register'))
+
+@app.route('/generator')
+@login_required
+def generator():
+    return render_template('generator.html')
 
 @app.route('/genre_playlist')
+@login_required
 def genre_playlist():
     return render_template('genre_playlist.html')
 
 @app.route('/generate_genre_playlist', methods=['POST'])
+@login_required
 def generate_genre_playlist():
     num_songs = int(request.form['num_songs'])
     genre = request.form['genre']
     playlist_url, suggested_genre = create_playlist(num_songs, genre)
 
     if playlist_url:
+        save_playlist_to_db(playlist_url, genre, current_user.username)
         return render_template('genre_playlist.html', genre_playlist_url=playlist_url)
     elif suggested_genre:
         return render_template('genre_playlist.html', genre_error=f"Did you mean '{suggested_genre}'?", genre_input=genre)
     else:
         return render_template('genre_playlist.html', genre_error=f"No tracks found for genre: {genre}")
+    
+@app.route('/randomizer')
+@login_required
+def randomizer():
+    return render_template('randomizer.html')
+
+@app.route('/get_random_playlist', methods=['POST'])
+@login_required
+def get_random_playlist():
+    playlist = Playlist.query.order_by(db.func.random()).first()
+    if playlist:
+        flash(f"Random Playlist: {playlist.playlist_link} (Genre: {playlist.genre})", 'success')
+    else:
+        flash('No playlists available', 'danger')
+    return redirect(url_for('randomizer'))
 
 @app.route('/login_register')
 def login_register():
