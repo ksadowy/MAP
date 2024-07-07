@@ -12,7 +12,7 @@
 
         <nav class="navbar">
             <a href="{{ url_for('generator') }}" style="--i:1;">Playlist from Genre</a>
-            <a href="{{ url_for('randomizer') }}" style="--i:2;">Random Playlist</a>
+            <a href="{{ url_for('genres') }}" style="--i:2;">Available Genres</a>
             <a href="{{ url_for('logout') }}" style="--i:3;">Logout</a>
         </nav>
     </header>
@@ -31,24 +31,23 @@
                     <label>Genre name</label>
                 </div>
 
-                <div class="input-box-PFG">
-                    <select id="playlist_visibility" name="playlist_visibility" required>
-                        <option value="private">Private</option>
-                        <option value="public">Public</option>
-                    </select>
-                    <label>Playlist Visibility</label>
-                </div>
-
                 <button type="submit" class="btn-PFG">Generate Playlist</button>
             </form>
             <div id="genre-result">
-                {% if genre_playlist_url %}
-                    <iframe src="{{ genre_playlist_url }}" width="200" height="280" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+                {% if genre_playlist_embed_code %}
+                    {{ genre_playlist_embed_code | safe }}
                 {% elif genre_error %}
                     <p>{{ genre_error }}</p>
                 {% endif %}
             </div>
         </div>
     </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            if (performance.navigation.type === performance.navigation.TYPE_RELOAD) {
+                window.location.href = window.location.pathname;
+            }
+        });
+    </script>
 </body>
 </html>

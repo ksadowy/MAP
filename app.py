@@ -47,34 +47,40 @@ SPOTIPY_REDIRECT_URI = os.getenv('SPOTIPY_REDIRECT_URI')
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIPY_CLIENT_ID,
                                                client_secret=SPOTIPY_CLIENT_SECRET,
                                                redirect_uri=SPOTIPY_REDIRECT_URI,
-                                               scope='playlist-modify-private',
-                                               cache_path='.cache'))
+                                               scope="playlist-modify-private playlist-modify-public"))
 
 def get_available_genres():
     available_genres = sp.recommendation_genre_seeds()['genres']
-    print(available_genres)
     return available_genres
 
 def create_playlist(num_songs, genre):
-    valid_genres = get_available_genres()
-    if genre.lower() not in valid_genres:
-        close_matches = difflib.get_close_matches(genre.lower(), valid_genres)
-        return None, close_matches[0] if close_matches else None
+    try:
+        valid_genres = get_available_genres()
+        if genre.lower() not in valid_genres:
+            close_matches = difflib.get_close_matches(genre.lower(), valid_genres)
+            return None, close_matches[0] if close_matches else None
 
-    results = sp.search(q=f'genre:{genre}', type='track', limit=50)
-    tracks = results['tracks']['items']
+        results = sp.search(q=f'genre:{genre}', type='track', limit=50)
+        tracks = results['tracks']['items']
 
-    if len(tracks) == 0:
+        if len(tracks) == 0:
+            return None, None
+
+        selected_tracks = random.sample(tracks, min(num_songs, len(tracks)))
+        track_ids = [track['id'] for track in selected_tracks]
+
+        user_id = sp.current_user()['id']
+        playlist = sp.user_playlist_create(user=user_id, name=f'Random {genre.capitalize()} Playlist', public=False)
+        sp.playlist_add_items(playlist_id=playlist['id'], items=track_ids)
+
+        return playlist['external_urls']['spotify'], playlist['id']
+    except spotipy.exceptions.SpotifyException as e:
+        print(f"Spotify API error: {e}")
+        if e.http_status == 403:
+            return None, "scope_error"
+        elif e.http_status == 401:
+            return None, "auth_error"
         return None, None
-
-    selected_tracks = random.sample(tracks, min(num_songs, len(tracks)))
-    track_ids = [track['id'] for track in selected_tracks]
-
-    user_id = sp.current_user()['id']
-    playlist = sp.user_playlist_create(user=user_id, name=f'Random {genre.capitalize()} Playlist', public=False)
-    sp.playlist_add_items(playlist_id=playlist['id'], items=track_ids)
-
-    return playlist['external_urls']['spotify'], None
 
 def save_playlist_to_db(playlist_link, genre, username):
     new_playlist = Playlist(playlist_link=playlist_link, genre=genre, username=username)
@@ -158,7 +164,7 @@ def register():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('login_register'))
+    return redirect(url_for('index'))
 
 @app.route('/generator')
 @login_required
@@ -170,42 +176,52 @@ def generator():
 def genre_playlist():
     return render_template('genre_playlist.html')
 
-@app.route('/generate_genre_playlist', methods=['POST'])
+@app.route('/generate_genre_playlist', methods=['GET', 'POST'])
 @login_required
 def generate_genre_playlist():
-    num_songs = int(request.form['num_songs'])
-    genre = request.form['genre']
-    playlist_url, suggested_genre = create_playlist(num_songs, genre)
+    if request.method == 'POST':
+        num_songs = int(request.form['num_songs'])
+        genre = request.form['genre']
+        playlist_url, playlist_id_or_error = create_playlist(num_songs, genre)
 
-    if playlist_url:
-        new_playlist = Playlist(
-            playlist_link=playlist_url,
-            genre=genre,
-            username=current_user.username
-        )
-        db.session.add(new_playlist)
-        db.session.commit()
+        if playlist_url:
+            playlist_id = playlist_url.split('/')[-1]
+            embed_code = f'<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/{playlist_id}?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="eager"></iframe>'
+            print(playlist_id)
 
-        return render_template('generator.html', genre_playlist_url=playlist_url)
-    elif suggested_genre:
-        return render_template('generator.html', genre_error=f"Did you mean '{suggested_genre}'?", genre_input=genre)
+            existing_playlist = Playlist.query.filter_by(playlist_link=playlist_url, genre=genre, username=current_user.username).first()
+            if not existing_playlist:
+                new_playlist = Playlist(
+                    playlist_link=playlist_url,
+                    genre=genre,
+                    username=current_user.username
+                )
+                db.session.add(new_playlist)
+                db.session.commit()
+
+            return render_template('generator.html', genre_playlist_embed_code=embed_code)
+        elif playlist_id_or_error == "scope_error":
+            flash("Client scope error. Please reauthenticate with necessary permissions.", 'danger')
+            return redirect(url_for('index'))
+        elif playlist_id_or_error == "auth_error":
+            flash("Authentication error. Please reauthenticate.", 'danger')
+            return redirect(url_for('index'))
+        elif playlist_id_or_error:
+            return render_template('generator.html', genre_error=f"Did you mean '{playlist_id_or_error}'?", genre_input=genre)
+        else:
+            return render_template('generator.html', genre_error=f"No tracks found for genre: {genre}")
     else:
-        return render_template('generator.html', genre_error=f"No tracks found for genre: {genre}")
+        session.pop('generated_playlist', None)
+        return render_template('generator.html')
+
 
     
-@app.route('/randomizer')
+@app.route('/genres')
 @login_required
-def randomizer():
-    return render_template('randomizer.html')
-
-@app.route('/get_random_playlist', methods=['POST'])
-@login_required
-def get_random_playlist():
-    playlist = Playlist.query.order_by(db.func.random()).first()
-    if playlist:
-        return render_template('randomizer.html', random_playlist_url=playlist.playlist_link)
-    else:
-        return render_template('randomizer.html', playlist_error='No playlists available')
+def genres():
+    available_genres = get_available_genres()
+    print(available_genres)
+    return render_template('genres.html', genres=available_genres)
 
 @app.route('/login_register')
 def login_register():

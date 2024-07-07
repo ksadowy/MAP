@@ -106,8 +106,8 @@ body::-webkit-scrollbar{
 .home-content h2:nth-of-type(2)
 {
     margin-bottom: 30px;
-    animation: slideTop 1s ease forwards;
-    animation-delay: 0.7s;
+    animation: slideLeft 1s ease forwards;
+    animation-delay: 1s;
 }
 
 .home-content h2 span
@@ -121,7 +121,7 @@ body::-webkit-scrollbar{
     font-weight: 700;
     margin: -3px 0;
     opacity: 0;
-    animation: slideRight 1s ease forwards;
+    animation: slideLeft 1s ease forwards;
     animation-delay: 1s;
 }
 
@@ -184,14 +184,14 @@ body::-webkit-scrollbar{
     padding-top: 16px;
     padding-bottom: 16px;
     opacity: 0;
-    animation: slideBottom 1s ease forwards;
+    animation: slideLeft 1s ease forwards;
     animation-delay: 0.7s;
 }
 
 .about-content h2:nth-of-type(2)
 {
     margin-bottom: 30px;
-    animation: slideTop 1s ease forwards;
+    animation: slideLeft 1s ease forwards;
     animation-delay: 0.7s;
 }
 
@@ -202,7 +202,7 @@ body::-webkit-scrollbar{
     padding-top: 16px;
     padding-bottom: 16px;
     opacity: 0;
-    animation: slideBottom 1s ease forwards;
+    animation: slideLeft 1s ease forwards;
     animation-delay: 0.7s;
 }
 
@@ -256,7 +256,7 @@ body::-webkit-scrollbar{
     font-size: 24px;
     font-weight: 700;
     opacity: 0;
-    animation: slideBottom 1s ease forwards;
+    animation: slideLeft 1s ease forwards;
     animation-delay: 0.7s;
 }
 
@@ -280,7 +280,7 @@ body::-webkit-scrollbar{
     margin: -3px 0;
     padding-bottom: 8px;
     opacity: 0;
-    animation: slideTop 1s ease forwards;
+    animation: slideRight 1s ease forwards;
     animation-delay: 1s;
 }
 

@@ -12,17 +12,18 @@
 
         <nav class="navbar">
             <a href="{{ url_for('generator') }}" style="--i:1;">Playlist from Genre</a>
-            <a href="{{ url_for('randomizer') }}" style="--i:2;">Random Playlist</a>
+            <a href="{{ url_for('genres') }}" style="--i:2;">Available Genres</a>
             <a href="{{ url_for('logout') }}" style="--i:3;">Logout</a>
         </nav>
     </header>
 
     <section class="PFG" id="PFG">
-        <div class="PFG-content">
-            <h1 class="heading">Random Playlist</h1>
-            <form id="random-form" action="{{ url_for('get_random_playlist') }}" method="POST">
-                <button type="submit" class="btn-PFG">Get Random Playlist</button>
-            </form>
+        <div class="genre-box">
+            <ul class="genre-list">
+                {% for genre in genres %}
+                <li>{{ genre }}</li>
+                {% endfor %}
+            </ul>
         </div>
     </section>
 </body>

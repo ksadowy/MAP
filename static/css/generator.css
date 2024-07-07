@@ -177,6 +177,7 @@ body::-webkit-scrollbar {
     font-size: 1em;
     color: #1a1d23;
     font-weight: 600;
+    margin-bottom: 20px;
 }
 
 .btn-PFG:hover {
@@ -225,4 +226,29 @@ body::-webkit-scrollbar {
         opacity: 1;
         transform: translateX(0);
     }
+}
+
+.genre-box {
+    border: 2px solid rgb(225, 102, 102);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 80%;
+    background-color: rgba(226, 79, 79, 0);
+    color: rgb(206, 200, 200);
+    font-family: Arial, sans-serif;
+}
+
+.genre-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.genre-list li {
+    display: inline;
+    margin: 1px 2px;
+    white-space: nowrap;
 }
