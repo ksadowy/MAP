@@ -50,28 +50,9 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIPY_CLIENT_ID,
                                                scope='playlist-modify-private',
                                                cache_path='.cache'))
 
-def create_random_artist_playlist(num_songs, artist_name):
-    results = sp.search(q=f'artist:{artist_name}', type='artist', limit=1)
-    if not results['artists']['items']:
-        return None
-
-    artist_id = results['artists']['items'][0]['id']
-    top_tracks = sp.artist_top_tracks(artist_id)['tracks']
-
-    if not top_tracks:
-        return None
-
-    selected_tracks = random.sample(top_tracks, min(num_songs, min(20, len(top_tracks))))
-    track_ids = [track['id'] for track in selected_tracks]
-
-    user_id = sp.current_user()['id']
-    playlist = sp.user_playlist_create(user=user_id, name=f'Random {artist_name.capitalize()} Playlist', public=False)
-    sp.playlist_add_items(playlist_id=playlist['id'], items=track_ids)
-
-    return playlist['external_urls']['spotify']
-
 def get_available_genres():
     available_genres = sp.recommendation_genre_seeds()['genres']
+    print(available_genres)
     return available_genres
 
 def create_playlist(num_songs, genre):
@@ -231,4 +212,4 @@ def login_register():
     return render_template('login_register.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

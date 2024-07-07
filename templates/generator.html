@@ -8,7 +8,7 @@
 </head>
 <body>
     <header class="header">
-        <a href="#" class="logo">Make a Playlist</a>
+        <a class="logo">Make a Playlist</a>
 
         <nav class="navbar">
             <a href="{{ url_for('generator') }}" style="--i:1;">Playlist from Genre</a>
@@ -22,13 +22,21 @@
             <h1 class="heading">Generate Playlist from Genre</h1>
             <form id="genre-form" action="/generate_genre_playlist" method="POST">
                 <div class="input-box-PFG">
-                    <input type="number" id="num_songs" name="num_songs" min="" max="50" required>
+                    <input type="number" id="num_songs" name="num_songs" min="5" max="50" required>
                     <label>Number of tracks in playlist</label>
                 </div>
 
                 <div class="input-box-PFG">
                     <input type="text" id="genre" name="genre" required>
                     <label>Genre name</label>
+                </div>
+
+                <div class="input-box-PFG">
+                    <select id="playlist_visibility" name="playlist_visibility" required>
+                        <option value="private">Private</option>
+                        <option value="public">Public</option>
+                    </select>
+                    <label>Playlist Visibility</label>
                 </div>
 
                 <button type="submit" class="btn-PFG">Generate Playlist</button>
